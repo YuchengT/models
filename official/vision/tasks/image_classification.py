@@ -210,30 +210,22 @@ class ImageClassificationTask(base_task.Task):
         ]
     return metrics
 
-  def train_step(self,
-                 inputs: Tuple[Any, Any],
-                 model: tf.keras.Model,
-                 optimizer: tf.keras.optimizers.Optimizer,
-                 metrics: Optional[List[Any]] = None):
-    """Does forward and backward.
-
-    Args:
-      inputs: A tuple of of input tensors of (features, labels).
-      model: A tf.keras.Model instance.
-      optimizer: The optimizer for this training step.
-      metrics: A nested structure of metrics objects.
-
-    Returns:
-      A dictionary of logs.
-    """
+  @tf.function
+  def forward_train_step(self,
+                           inputs: Tuple[Any, Any],
+                           model: tf.keras.Model,
+                           optimizer: tf.keras.optimizers.Optimizer)
+    
     features, labels = inputs
     is_multilabel = self.task_config.train_data.is_multilabel
     if self.task_config.losses.one_hot and not is_multilabel:
       labels = tf.one_hot(labels, self.task_config.model.num_classes)
 
     num_replicas = tf.distribute.get_strategy().num_replicas_in_sync
+    
     with tf.GradientTape() as tape:
       outputs = model(features, training=True)
+
       # Casting output layer as float32 is necessary when mixed_precision is
       # mixed_float16 or mixed_bfloat16 to ensure output is casted as float32.
       outputs = tf.nest.map_structure(
@@ -261,15 +253,43 @@ class ImageClassificationTask(base_task.Task):
     if isinstance(
         optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
       grads = optimizer.get_unscaled_gradients(grads)
+    
+    return outputs, scaled_loss, tvars, grads
+    
+
+  def train_step(self,
+                 inputs: Tuple[Any, Any],
+                 model: tf.keras.Model,
+                 optimizer: tf.keras.optimizers.Optimizer,
+                 metrics: Optional[List[Any]] = None):
+    """Does forward and backward.
+
+    Args:
+      inputs: A tuple of input tensors of (features, labels).
+      model: A tf.keras.Model instance.
+      optimizer: The optimizer for this training step.
+      metrics: A nested structure of metrics objects.
+
+    Returns:
+      A dictionary of logs.
+    """
+    outputs, scaled_loss, tvars, grads = forward_train_step(inputs, model, optimizer)
+   
     optimizer.apply_gradients(list(zip(grads, tvars)))
 
     logs = {self.loss: loss}
+
+    # Convert logits to softmax for metric computation if needed.
+    if hasattr(self.task_config.model,
+               'output_softmax') and self.task_config.model.output_softmax:
+      outputs = tf.nn.softmax(outputs, axis=-1)
     if metrics:
       self.process_metrics(metrics, labels, outputs)
     elif model.compiled_metrics:
       self.process_compiled_metrics(model.compiled_metrics, labels, outputs)
       logs.update({m.name: m.result() for m in model.metrics})
     return logs
+
 
   def validation_step(self,
                       inputs: Tuple[Any, Any],
