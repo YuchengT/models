@@ -129,7 +129,7 @@ class ImageClassificationTask(base_task.Task):
 
     return dataset
   
-  @tf.function
+  @tf.function()
   def build_losses(self,
                    labels: tf.Tensor,
                    model_outputs: tf.Tensor,
@@ -211,7 +211,7 @@ class ImageClassificationTask(base_task.Task):
         ]
     return metrics
 
-  @tf.function
+  @tf.function()
   def forward_train_step(self,
                          inputs: Tuple[Any, Any],
                          model: tf.keras.Model,
