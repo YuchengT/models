@@ -208,8 +208,8 @@ class TrainerConfig(base_config.Config):
   """
   optimizer_config: OptimizationConfig = OptimizationConfig()
   # Orbit settings.
-  train_tf_while_loop: bool = True
-  train_tf_function: bool = True
+  train_tf_while_loop: bool = False
+  train_tf_function: bool = False
   eval_tf_function: bool = True
   eval_tf_while_loop: bool = False
   allow_tpu_summary: bool = False
