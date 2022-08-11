@@ -396,12 +396,12 @@ class Trainer(_AsyncTrainer):
 
   def train_step(self, iterator):
     """See base class."""
-
+    
     def step_fn(inputs):
-      if self.config.runtime.enable_xla and (self.config.runtime.num_gpus > 0):
-        task_train_step = tf.function(self.task.train_step, jit_compile=True)
-      else:
-        task_train_step = self.task.train_step
+      #if self.config.runtime.enable_xla and (self.config.runtime.num_gpus > 0):
+        #task_train_step = tf.function(self.task.train_step, jit_compile=True)
+      #else:
+      task_train_step = self.task.train_step
       logs = task_train_step(
           inputs,
           model=self.model,
@@ -409,9 +409,9 @@ class Trainer(_AsyncTrainer):
           metrics=self.train_metrics)
       self._train_loss.update_state(logs[self.task.loss])
       self.global_step.assign_add(1)
-
-    self.strategy.run(
-        step_fn, args=(next(iterator),), options=self._runtime_options)
+    
+    tf.function(self.strategy.run(
+       step_fn, args=(next(iterator),), options=self._runtime_options),jit_compile=True)
 
   def eval_begin(self):
     """Sets up metrics."""
