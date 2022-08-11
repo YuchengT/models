@@ -63,8 +63,8 @@ class StandardTrainerOptions:
       (one with summary calls, and one without). The program with summaries runs
       only for one step when summaries should be recorded.
   """
-  use_tf_function: bool = True
-  use_tf_while_loop: bool = True
+  use_tf_function: bool = False
+  use_tf_while_loop: bool = False
   use_tpu_summary_optimization: bool = False
 
 
