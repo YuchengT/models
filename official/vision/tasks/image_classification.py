@@ -219,7 +219,7 @@ class ImageClassificationTask(base_task.Task):
   def forward_train_step(self,
                          inputs: Tuple[Any, Any],
                          model: tf.keras.Model,
-                         optimizer: tf.keras.optimizers.Optimizer)
+                         optimizer: tf.keras.optimizers.Optimizer):
    
     features, labels = inputs
     is_multilabel = self.task_config.train_data.is_multilabel
