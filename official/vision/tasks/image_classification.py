@@ -273,7 +273,7 @@ class ImageClassificationTask(base_task.Task):
     Returns:
       A dictionary of logs.
     """
-    outputs, scaled_loss, tvars, grads = self.forward_train_step(inputs, model, optimizer)
+    outputs, scaled_loss, tvars, grads = self.forward_train_step(inputs, model)
    
     optimizer.apply_gradients(list(zip(grads, tvars)))
 
