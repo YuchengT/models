@@ -217,10 +217,10 @@ class ImageClassificationTask(base_task.Task):
 
   @tf.function
   def forward_train_step(self,
-                           inputs: Tuple[Any, Any],
-                           model: tf.keras.Model,
-                           optimizer: tf.keras.optimizers.Optimizer)
-    
+                         inputs: Tuple[Any, Any],
+                         model: tf.keras.Model,
+                         optimizer: tf.keras.optimizers.Optimizer)
+   
     features, labels = inputs
     is_multilabel = self.task_config.train_data.is_multilabel
     if self.task_config.losses.one_hot and not is_multilabel:
