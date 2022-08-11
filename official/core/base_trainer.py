@@ -410,8 +410,8 @@ class Trainer(_AsyncTrainer):
       self._train_loss.update_state(logs[self.task.loss])
       self.global_step.assign_add(1)
     
-    tf.function(self.strategy.run(
-       step_fn, args=(next(iterator),), options=self._runtime_options),jit_compile=True)
+    self.strategy.run(
+       step_fn, args=(next(iterator),), options=self._runtime_options)
 
   def eval_begin(self):
     """Sets up metrics."""
