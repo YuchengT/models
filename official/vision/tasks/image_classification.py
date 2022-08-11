@@ -214,8 +214,7 @@ class ImageClassificationTask(base_task.Task):
   @tf.function()
   def forward_train_step(self,
                          inputs: Tuple[Any, Any],
-                         model: tf.keras.Model,
-                         optimizer: tf.keras.optimizers.Optimizer):
+                         model: tf.keras.Model):
    
     features, labels = inputs
     is_multilabel = self.task_config.train_data.is_multilabel
@@ -252,7 +251,7 @@ class ImageClassificationTask(base_task.Task):
     # Scales back gradient before apply_gradients when LossScaleOptimizer is
     # used.
     #if isinstance(
-    #   optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
+    #  optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
     # grads = optimizer.get_unscaled_gradients(grads)
     
     return outputs, scaled_loss, tvars, grads
