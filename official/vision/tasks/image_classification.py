@@ -32,7 +32,8 @@ from official.vision.ops import augment
 @task_factory.register_task_cls(exp_cfg.ImageClassificationTask)
 class ImageClassificationTask(base_task.Task):
   """A task for image classification."""
-
+  
+  @tf.function
   def build_model(self):
     """Builds classification model."""
     input_specs = tf.keras.layers.InputSpec(
@@ -50,7 +51,8 @@ class ImageClassificationTask(base_task.Task):
         model_config=self.task_config.model,
         l2_regularizer=l2_regularizer)
     return model
-
+  
+  @tf.function
   def initialize(self, model: tf.keras.Model):
     """Loads pretrained checkpoint."""
     if not self.task_config.init_checkpoint:
@@ -75,7 +77,8 @@ class ImageClassificationTask(base_task.Task):
 
     logging.info('Finished loading pretrained checkpoint from %s',
                  ckpt_dir_or_file)
-
+    
+  @tf.function
   def build_inputs(
       self,
       params: exp_cfg.DataConfig,
@@ -128,7 +131,8 @@ class ImageClassificationTask(base_task.Task):
     dataset = reader.read(input_context=input_context)
 
     return dataset
-
+  
+  @tf.function
   def build_losses(self,
                    labels: tf.Tensor,
                    model_outputs: tf.Tensor,
@@ -171,7 +175,8 @@ class ImageClassificationTask(base_task.Task):
 
     total_loss = losses_config.loss_weight * total_loss
     return total_loss
-
+  
+  @tf.function
   def build_metrics(self,
                     training: bool = True) -> List[tf.keras.metrics.Metric]:
     """Gets streaming metrics for training/validation."""
@@ -290,7 +295,7 @@ class ImageClassificationTask(base_task.Task):
       logs.update({m.name: m.result() for m in model.metrics})
     return logs
 
-
+  @tf.function
   def validation_step(self,
                       inputs: Tuple[Any, Any],
                       model: tf.keras.Model,
@@ -326,7 +331,7 @@ class ImageClassificationTask(base_task.Task):
       self.process_compiled_metrics(model.compiled_metrics, labels, outputs)
       logs.update({m.name: m.result() for m in model.metrics})
     return logs
-
+  @tf.function
   def inference_step(self, inputs: tf.Tensor, model: tf.keras.Model):
     """Performs the forward step."""
     return model(inputs, training=False)
