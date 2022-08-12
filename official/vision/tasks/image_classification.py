@@ -129,7 +129,6 @@ class ImageClassificationTask(base_task.Task):
 
     return dataset
   
-  @tf.function()
   def build_losses(self,
                    labels: tf.Tensor,
                    model_outputs: tf.Tensor,
@@ -211,7 +210,6 @@ class ImageClassificationTask(base_task.Task):
         ]
     return metrics
 
-  @tf.function()
   def forward_train_step(self,
                          inputs: Tuple[Any, Any],
                          model: tf.keras.Model,
@@ -274,7 +272,7 @@ class ImageClassificationTask(base_task.Task):
     Returns:
       A dictionary of logs.
     """
-    outputs, scaled_loss, tvars, grads = self.forward_train_step(inputs, model, optimizer)
+    outputs, scaled_loss, tvars, grads = tf.function(self.forward_train_step(inputs, model, optimizer),jit_compile=True)
    
     optimizer.apply_gradients(list(zip(grads, tvars)))
 
