@@ -401,7 +401,7 @@ class Trainer(_AsyncTrainer):
       if self.config.runtime.enable_xla and (self.config.runtime.num_gpus > 0):
         task_train_step = tf.function(self.task.train_step)
       else:
-      task_train_step = self.task.train_step
+        task_train_step = self.task.train_step
       logs = task_train_step(
           inputs,
           model=self.model,
